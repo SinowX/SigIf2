@@ -41,7 +41,7 @@ class TcpWrap
 		// receive all to buffer
 		int ReceiveAll();
 		int Receive(char* buffer, ssize_t len);
-		int Send(char* buffer, ssize_t len);
+		int Send(const char* buffer, ssize_t len);
 
     inline const int get_fd()const {return fd_;}
 		/* inline const int get_op_fd() const {return op_fd_;} */

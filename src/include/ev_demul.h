@@ -69,59 +69,12 @@ class EvDemul
 						ev_hdlr_->Handle_Accept(fd);
 					}else{
 						ev_hdlr_->Handle_Read(fd);
-						/* conn->get_tcp_conn()->ReceiveAll(); */
-						/* BufferPtr buff = conn->get_tcp_conn()->get_r_buffer(); */
-						/* while(!buff->empty()) */
-						/* { */
-						/* 	std::string task; */
-						/* 	bool brace_match{false}; */
-						/* 	int cnt{-1}; */
-						/* 	bool buffer_error{false}; */
-
-						/* 	for(std::string::iterator it = buff->begin();it!=buff->end();it++) */
-						/* 	{ */
-						/* 		if(*it=='{') */
-						/* 		{ */
-						/* 			if(cnt==-1) cnt=1; */
-						/* 			else cnt++; */
-						/* 		}else{ */
-						/* 			if(cnt==-1) */
-						/* 			{ */
-						/* 				buffer_error=true; */
-						/* 				break; */
-						/* 			}else{ */
-						/* 				cnt--; */
-						/* 				if(cnt==0) */
-						/* 				{ */
-						/* 					brace_match=true; */
-						/* 					// this is one pack */
-						/* 					task=std::string(buff->begin(),it); */
-						/* 					buff->erase(buff->begin(), it); */
-						/* 				} */
-						/* 			} */
-						/* 		} */
-						/* 	} */
-						/* 	if(buffer_error) */
-						/* 	{ */
-						/* 		ev_hdlr_->Handle_ConnError(fd); */
-						/* 		break; */
-						/* 	} */
-						/* 	else if(brace_match) */
-						/* 	{ */
-						/* 		// read buffer */
-						/* 		ev_hdlr_->Handle_Query(fd,task.c_str()); */
-						/* 		continue; */
-						/* 	} */
-						/* 	else break; */
-						/* 	// if did not get one pack ,then just break */
-						/* } */
 					}
 				}
 				if(events & EPOLLERR|| events & EPOLLRDHUP)
 				{
 					ev_hdlr_->Handle_Error(fd);
 				}
-
 			}
 		}
 

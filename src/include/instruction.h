@@ -303,9 +303,7 @@ namespace DATA_CONTENT
 		typedef struct{
 			uint8_t type;
 			uint64_t time;
-			uint32_t content_1;
-			uint16_t content_2;
-			uint8_t content_3;
+			char content[7];
 		}__attribute__((packed)) para; // 12 bytes
 
 	}

@@ -660,12 +660,7 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 	parser.Parse(reinterpret_cast<const unsigned char*>
 			(pack->c_str()),pack->size());
 	
-	char task_key[20];
 	
-	snprintf(task_key, 20, "%s-%u",
-			machine_conn->get_ipv4(), parser.GetInsType());
-	
-	auto client_conn = HupTaskMap::getInstance().FindTask(task_key);
 
 	json j_res;
 	json j_meta;
@@ -786,25 +781,159 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 		case InsType::SemaphoreGroupQueryReply:
 		case InsType::SemaphoreGroupSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::SemaphoreGroup;
+			using cn_t = DATA_CONTENT::SemaphoreGroup::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["group_number"]=GETCONTENTARR->grp_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["control_type"]=GETCONTENTARR->ctrl_type;
+				j_content.push_back(j_content_ele);
+				j_content_ele["control_number"]=GETCONTENTARR->ctrl_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["flash"]=GETCONTENTARR->flash;
+				j_content.push_back(j_content_ele);
+				j_content_ele["brightness"]=GETCONTENTARR->brightness;
+				j_content.push_back(j_content_ele);
+				j_content_ele["location_x"]=GETCONTENTARR->location_x;
+				j_content.push_back(j_content_ele);
+				j_content_ele["location_y"]=GETCONTENTARR->location_y;
+				j_content.push_back(j_content_ele);
+				j_content_ele["timer_number"]=GETCONTENTARR->timer_id;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["group"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::PhaseQueryReply:
 		case InsType::PhaseSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::Phase;
+			using cn_t = DATA_CONTENT::Phase::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["phase_id"]=GETCONTENTARR->phase_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["pedastrain_pass"]=GETCONTENTARR->pedastrain_pass;
+				j_content.push_back(j_content_ele);
+				j_content_ele["pedastrain_clear"]=GETCONTENTARR->pedastrain_clear;
+				j_content.push_back(j_content_ele);
+				j_content_ele["min_green"]=GETCONTENTARR->min_green;
+				j_content.push_back(j_content_ele);
+				j_content_ele["lag_green"]=GETCONTENTARR->lag_green;
+				j_content.push_back(j_content_ele);
+				j_content_ele["max_green_1"]=GETCONTENTARR->max_green_1;
+				j_content.push_back(j_content_ele);
+				j_content_ele["max_green_2"]=GETCONTENTARR->max_green_2;
+				j_content.push_back(j_content_ele);
+				j_content_ele["yellow_transition"]=GETCONTENTARR->yellow_transition;
+				j_content.push_back(j_content_ele);
+				j_content_ele["red_clear"]=GETCONTENTARR->red_clear;
+				j_content.push_back(j_content_ele);
+				j_content_ele["protection"]=GETCONTENTARR->protection;
+				j_content.push_back(j_content_ele);
+				j_content_ele["inc_init"]=GETCONTENTARR->inc_init;
+				j_content.push_back(j_content_ele);
+				j_content_ele["inc_max"]=GETCONTENTARR->inc_max;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dec_previous_time"]=GETCONTENTARR->dec_previous_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dec_previous_traffic"]=GETCONTENTARR->dec_previous_traffic;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dec_time"]=GETCONTENTARR->dec_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dec_rate"]=GETCONTENTARR->dec_rate;
+				j_content.push_back(j_content_ele);
+				j_content_ele["min_interval"]=GETCONTENTARR->min_interval;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dynamic_max"]=GETCONTENTARR->dynamic_max;
+				j_content.push_back(j_content_ele);
+				j_content_ele["dynamic_step"]=GETCONTENTARR->dynamic_step;
+				j_content.push_back(j_content_ele);
+				j_content_ele["initial_para"]=GETCONTENTARR->initial_para;
+				j_content.push_back(j_content_ele);
+				j_content_ele["option"]=GETCONTENTARR->option;
+				j_content.push_back(j_content_ele);
+				j_content_ele["loop_id"]=GETCONTENTARR->loop_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["cocurrency_phase"]=GETCONTENTARR->cocurrency_phase;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["status"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::TimingSchemeQueryReply:
 		case InsType::TimingSchemeSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::TimingScheme;
+			using cn_t = DATA_CONTENT::TimingScheme::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["time_id"]=GETCONTENTARR->time_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["phase"]=GETCONTENTARR->phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["time_len"]=GETCONTENTARR->time_len;
+				j_content.push_back(j_content_ele);
+				j_content_ele["mode"]=GETCONTENTARR->mode;
+				j_content.push_back(j_content_ele);
+				j_content_ele["option"]=GETCONTENTARR->option;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["scheme"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::ScheduleQueryReply:
 		case InsType::ScheduleSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::Schedule;
+			using cn_t = DATA_CONTENT::Schedule::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["plan_id"]=GETCONTENTARR->plan_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["month_data"]=GETCONTENTARR->month_data;
+				j_content.push_back(j_content_ele);
+				j_content_ele["week_data"]=GETCONTENTARR->week_data;
+				j_content.push_back(j_content_ele);
+				j_content_ele["day_data"]=GETCONTENTARR->day_data;
+				j_content.push_back(j_content_ele);
+				j_content_ele["time_schedule_number"]=GETCONTENTARR->time_schedule_id;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["plan"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::WorkModeQueryReply:
@@ -830,7 +959,28 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 		case InsType::FailureQueryReply:
 		case InsType::FailureUpload:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::Failure;
+			using cn_t = DATA_CONTENT::Failure::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["type"]=GETCONTENTARR->type;
+				j_content.push_back(j_content_ele);
+				j_content_ele["timestamp"]=GETCONTENTARR->time;
+				j_content.push_back(j_content_ele);
+				char tmpstr[8]{'\0'};
+				strncpy(tmpstr, GETCONTENTARR->content, 7);
+				j_content_ele["content"]=tmpstr;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["failure"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::VersionQueryReply:
@@ -859,25 +1009,105 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 		}
 		case InsType::IdentificationCodeQueryReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
 			break;
 		}
 		case InsType::DetectorQueryReply:
 		case InsType::DetectorSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::Detector;
+			using cn_t = DATA_CONTENT::Detector::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["id"]=GETCONTENTARR->ID;
+				j_content.push_back(j_content_ele);
+				j_content_ele["option"]=GETCONTENTARR->OPTION;
+				j_content.push_back(j_content_ele);
+				j_content_ele["open_phase"]=GETCONTENTARR->OPEN_PHASE;
+				j_content.push_back(j_content_ele);
+				j_content_ele["close_phase"]=GETCONTENTARR->CLOSE_PHASE;
+				j_content.push_back(j_content_ele);
+				j_content_ele["delay_time"]=GETCONTENTARR->DELAY_TIME;
+				j_content.push_back(j_content_ele);
+				j_content_ele["delay"]=GETCONTENTARR->DELAY;
+				j_content.push_back(j_content_ele);
+				j_content_ele["queue_limit"]=GETCONTENTARR->QUEUE_LIMIT;
+				j_content.push_back(j_content_ele);
+				j_content_ele["no_response"]=GETCONTENTARR->NO_RESPONSE;
+				j_content.push_back(j_content_ele);
+				j_content_ele["max_exist"]=GETCONTENTARR->MAX_EXSIT;
+				j_content.push_back(j_content_ele);
+				j_content_ele["error_count"]=GETCONTENTARR->ERROR_COUNT;
+				j_content.push_back(j_content_ele);
+				j_content_ele["failure_time"]=GETCONTENTARR->FALURE_TIME;
+				j_content.push_back(j_content_ele);
+				j_content_ele["warning"]=GETCONTENTARR->WARNING;
+				j_content.push_back(j_content_ele);
+				j_content_ele["warning_log"]=GETCONTENTARR->WARNING_LOG;
+				j_content.push_back(j_content_ele);
+				j_content_ele["reset"]=GETCONTENTARR->RESET;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["content"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::PhaseSequenceTableQueryReply:
 		case InsType::PhaseSequenceTableSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::PhaseSequenceTable;
+			using cn_t = DATA_CONTENT::PhaseSequenceTable::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["table_number"]=GETCONTENTARR->TABLE_ID;
+				j_content.push_back(j_content_ele);
+				j_content_ele["loop_number"]=GETCONTENTARR->LOOP_ID;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["phasesequence"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::SchemaTableQueryReply:
 		case InsType::SchemaTableSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::SchemaTable;
+			using cn_t = DATA_CONTENT::SchemaTable::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["id"]=GETCONTENTARR->id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["cycle_length"]=GETCONTENTARR->cycle_length;
+				j_content.push_back(j_content_ele);
+				j_content_ele["phase_difference"]=GETCONTENTARR->phase_difference;
+				j_content.push_back(j_content_ele);
+				j_content_ele["green_sig_rate_table_id"]=GETCONTENTARR->green_sig_rate_table_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["phase_sequence_id"]=GETCONTENTARR->phase_sequence_id;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["schema"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::ActionTableQueryReply:
@@ -897,13 +1127,67 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 		case InsType::TimeTableQueryReply:
 		case InsType::TimeTableSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::TimeTable;
+			using cn_t = DATA_CONTENT::TimeTable::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["time_table_id"]=GETCONTENTARR->time_table_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["time_segment_id"]=GETCONTENTARR->time_segment_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["time_segment_begin_hour"]=GETCONTENTARR->time_segment_begin_hour;
+				j_content.push_back(j_content_ele);
+				j_content_ele["time_segment_begin_minu"]=GETCONTENTARR->time_segment_begin_minu;
+				j_content.push_back(j_content_ele);
+				j_content_ele["action_id"]=GETCONTENTARR->action_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["failure_plan_id"]=GETCONTENTARR->failure_plan_id;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["table"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::FollowPhaseTableQueryReply:
 		case InsType::FollowPhaseTableSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::FollowPhaseTable;
+			using cn_t = DATA_CONTENT::FollowPhaseTable::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["id"]=GETCONTENTARR->id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["type"]=GETCONTENTARR->type;
+				j_content.push_back(j_content_ele);
+				j_content_ele["father_phase"]=GETCONTENTARR->father_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["correct_phase"]=GETCONTENTARR->correct_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["green_time"]=GETCONTENTARR->green_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["yellow_time"]=GETCONTENTARR->yellow_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["red_time"]=GETCONTENTARR->red_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["green_flash"]=GETCONTENTARR->green_flash;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["table"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::UnitParameterQueryReply:
@@ -934,34 +1218,125 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn)
 		case InsType::PedestrianDetectorQueryReply:
 		case InsType::PedestrianDetectorSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::PedestrianDetector;
+			using cn_t = DATA_CONTENT::PedestrianDetector::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["detector_id"]=GETCONTENTARR->detector_id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["trigger_phase"]=GETCONTENTARR->trigger_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["no_response"]=GETCONTENTARR->no_response;
+				j_content.push_back(j_content_ele);
+				j_content_ele["max_trigger_time"]=GETCONTENTARR->max_trigger_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["error_count"]=GETCONTENTARR->error_count;
+				j_content.push_back(j_content_ele);
+				j_content_ele["warning"]=GETCONTENTARR->warning;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["content"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::FailureConfigQueryReply:
 		case InsType::FailureConfigSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::FailureConfig;
+			using cn_t = DATA_CONTENT::FailureConfig::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["id"]=GETCONTENTARR->id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["mode"]=GETCONTENTARR->mode;
+				j_content.push_back(j_content_ele);
+				j_content_ele["operation"]=GETCONTENTARR->operation;
+				j_content.push_back(j_content_ele);
+				j_content_ele["operation_value"]=GETCONTENTARR->operation_value;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["config"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		case InsType::PriorityConfigQueryReply:
 		case InsType::PriorityConfigSettingReply:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
+			j_meta["type"]=IFTYPE::PriorityConfig;
+			using cn_t = DATA_CONTENT::PriorityConfig::para;
+			json j_content, j_content_ele;
+			
+			for(int i=0;i<parser.GetContentLen()/sizeof(cn_t);i++)
+			{
+				/* reinterpret_cast<const cn_t*>(parser.GetContent()+i*sizeof(cn_t)); */
+				j_content_ele["id"]=GETCONTENTARR->id;
+				j_content.push_back(j_content_ele);
+				j_content_ele["control_interface"]=GETCONTENTARR->control_interface;
+				j_content.push_back(j_content_ele);
+				j_content_ele["link"]=GETCONTENTARR->link;
+				j_content.push_back(j_content_ele);
+				j_content_ele["delay"]=GETCONTENTARR->delay;
+				j_content.push_back(j_content_ele);
+				j_content_ele["min_green"]=GETCONTENTARR->link;
+				j_content.push_back(j_content_ele);
+				j_content_ele["motor_linger"]=GETCONTENTARR->motor_linger;
+				j_content.push_back(j_content_ele);
+				j_content_ele["pedastrain_linger"]=GETCONTENTARR->pedastrain_linger;
+				j_content.push_back(j_content_ele);
+				j_content_ele["pass_time"]=GETCONTENTARR->pass_time;
+				j_content.push_back(j_content_ele);
+				j_content_ele["min_interval"]=GETCONTENTARR->min_interval;
+				j_content.push_back(j_content_ele);
+				j_content_ele["max_continue"]=GETCONTENTARR->max_continue;
+				j_content.push_back(j_content_ele);
+				j_content_ele["track_phase"]=GETCONTENTARR->track_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["motor_linger_phase"]=GETCONTENTARR->motor_linger_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["pedastrain_linger_phase"]=GETCONTENTARR->pedastrain_linger_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["exit_phase"]=GETCONTENTARR->exit_phase;
+				j_content.push_back(j_content_ele);
+				j_content_ele["priority_status"]=GETCONTENTARR->priority_status;
+				j_content.push_back(j_content_ele);
+
+			}
+			
+			j_data["config"]=j_content;
+
+			j_res["meta"]=j_meta;
+			j_res["data"]=j_data;
 			break;
 		}
 		default:
 		{
-			j_meta["type"]=IFTYPE::WorkStatus;
 			break;
 		}
 	}
 
 
-	/* parser.GetInsName(); */
-
-
-
-
+	char task_key[20];
+	snprintf(task_key, 20, "%s-%u",
+			machine_conn->get_ipv4(), parser.GetInsType());
+	auto task = HupTaskMap::getInstance().FindTask(task_key);
+	auto res_str = j_res.dump();
+	task->client_conn->get_tcp_conn()->Send(res_str.c_str(),res_str.size());
+	HupTaskMap::getInstance().DropTask(task_key);
+	
 }
 
 // write handlers

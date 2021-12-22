@@ -86,7 +86,7 @@ class TaskWrap
 		uint8_t instype;
 		ConnInfoPtr machine_conn;
 		// if task is a query, use next var to write back result
-		ConnInfoPtr client_conn; 
+		ConnInfoPtr client_conn;
 };
 
 using TaskWrapPtr = std::shared_ptr<TaskWrap>;
@@ -106,19 +106,23 @@ class HupTaskMap
 		{
 			std::lock_guard<std::mutex> lk(mtx_);
 
-			map_.insert({task->machine_conn->get_ipv4(), task});
+			char tmpstr[30]{'\0'};
+			snprintf(tmpstr, 29,"%s-%u",task->machine_conn->get_ipv4(),task->instype); 
+			map_.insert({tmpstr, task});
 			return 0;
 		}
-		int DropTask(const char* ipv4)
+		// key is "${machine_ip}-${instype}"
+		int DropTask(const char* key)
 		{
 			std::lock_guard<std::mutex> lk(mtx_);
-			map_.erase(ipv4);
+			map_.erase(key);
 			return 0;
 		}
-		TaskWrapPtr FindTask(const char* ipv4)
+		// key is "${machine_ip}-${instype}"
+		TaskWrapPtr FindTask(const char* key)
 		{
 			std::lock_guard<std::mutex> lk(mtx_);
-			auto res = map_.find(ipv4);
+			auto res = map_.find(key);
 			return res->second;
 		}
 
@@ -129,15 +133,10 @@ class HupTaskMap
 			{ return std::strcmp(a,b)<0; }
 		};
 		HupTaskMap(){};
-		std::map<const char*, TaskWrapPtr, cmp_str> map_;
+		std::multimap<const char*, TaskWrapPtr, cmp_str> map_;
+		/* std::map<const char*, TaskWrapPtr, cmp_str> map_; */
 		std::mutex mtx_;
 };
 
-/* using WaitingQ = Conn_Q; */
-/* static Conn_Q& WaitingQ() */
-/* { */
-/* 	static Conn_Q conn_q_; */
-/* 	return conn_q_; */
-/* } */
 
 #endif
