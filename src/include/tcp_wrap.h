@@ -1,3 +1,6 @@
+// TCP Wrap
+// TCP连接封装
+// 提供TCP连接相关操作
 #ifndef TCP_WRAP_H
 #define TCP_WRAP_H
 

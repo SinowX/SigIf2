@@ -1,3 +1,5 @@
+// Error Handler
+// 错误简单处理函数
 #ifndef ERR_HANDLE_H
 #define ERR_HANDLE_H
 #include <cstdio>

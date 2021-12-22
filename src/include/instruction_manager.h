@@ -1,3 +1,6 @@
+// Instruction Manager
+// 星志指令管理
+// InsPack 打包指令，InsParser 解析指令
 #ifndef INSTRUCTION_MANAGER_H
 #define INSTRUCTION_MANAGER_H
 

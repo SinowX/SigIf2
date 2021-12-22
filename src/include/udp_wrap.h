@@ -1,3 +1,6 @@
+// UDP Wrap
+// UDP连接封装
+// 提供UDP连接相关操作
 #ifndef UDP_WRAP
 #define UDP_WRAP
 

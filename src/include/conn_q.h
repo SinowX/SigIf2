@@ -1,3 +1,6 @@
+// Connection Queue
+// 线程间通信、同步的通道
+// 当前还包含了HupTaskMap的内容，见下方
 #ifndef CONN_Q_H
 #define CONN_Q_H
 
@@ -12,11 +15,7 @@ class Conn_Q
 	public:
 		Conn_Q()
 		{}
-		/* static Conn_Q& getInstance() */
-		/* { */
-		/* 	static Conn_Q instance_; */
-		/* 	return instance_; */
-		/* } */
+
 		Conn_Q(Conn_Q&)=delete;
 		void operator=(Conn_Q&)=delete;
 	
@@ -74,6 +73,15 @@ static Conn_Q& TaskQ()
 	return conn_q_;
 }
 
+
+
+
+// Hang Up Task Map
+// TaskWrap 是对任务涉及的客户与信号机之间的基本信息
+// 由于可能会出现重复的任务，因而使用了std::multimap
+// 若不同客户端向同一台信号机发送相同指令，则会导致key重复
+// 由于无法鉴别信号机的响应是对于哪一次请求的
+// 因而对于每一个响应，将会在HubTaskMap中取出一个Task，并回复客户端
 #include <map>
 
 class TaskWrap

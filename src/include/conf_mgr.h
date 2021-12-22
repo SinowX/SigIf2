@@ -1,3 +1,5 @@
+// Configuration Manager
+// 读取配置文件，并提供全局访问配置信息功能
 #ifndef CONF_MGR_H
 #define CONF_MGR_H
 

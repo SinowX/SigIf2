@@ -1,3 +1,6 @@
+// Event Handler
+// 事件处理器
+// 封装绑定的处理函数，由EvDemul调用
 #ifndef EV_HDLR_H
 #define EV_HDLR_H
 

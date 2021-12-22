@@ -1,3 +1,5 @@
+// Threads
+// 线程主函数声明
 #ifndef THRD_H
 #define THRD_H
 

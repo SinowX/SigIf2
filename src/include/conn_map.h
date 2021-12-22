@@ -1,3 +1,5 @@
+// Connection Map
+// 提供由fd或ipv4_addr 查询对应Connection Info功能
 #ifndef CONN_MAP_H
 #define CONN_MAP_H
 

@@ -1,3 +1,4 @@
+// 任务处理函数的实现
 #include "handler.h"
 #include "conn_map.h"
 #include "conn_q.h"
@@ -25,8 +26,9 @@ int accept_fd_hdlr(const int fd)
 	return 0;
 }
 
+// 已实现，在另外的一个仓库，还未加进来
 bool CheckIfValid(nlohmann::basic_json<>& rqs);
-
+//
 bool CheckIfQuery(nlohmann::basic_json<>& rqs);
 /* bool CheckIfQueryRes(nlohmann::basic_json<>& rqs); */
 bool CheckIfSetting(nlohmann::basic_json<>& rqs);

@@ -1,3 +1,5 @@
+// Connection Infomation
+// 封装TCP或UDP连接，提供查询对应连接信息与发送、接收接口
 #ifndef CONN_INFO_H
 #define CONN_INFO_H
 

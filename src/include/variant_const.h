@@ -28,7 +28,7 @@ typedef struct EachMachineType
   MachineInfo* head;
 }EachMachineType;
 
-//
+// 用于读取配置文件，保存信号机的相关信息
 typedef struct
 {
   EachMachineType XINGZHI;
@@ -38,7 +38,7 @@ typedef struct
   EachMachineType DEVICE5;
 }Machine;
 
-
+// 接口指令类型字符串，用于匹配客户端的json请求
 namespace  IFTYPE{
   const char* ActionTable="ActionTable";
   const char* CharacterParameterVersion="CharacterParameterVersion";
@@ -66,6 +66,7 @@ namespace  IFTYPE{
   const char* WorkStatus="WorkStatus";
 };
 
+// 接口操作类型字符串，用于匹配客户端、写回客户端的json请求
 namespace IFACTION{
 	const char* Query="query";
 	const char* QueryRes="query_res";

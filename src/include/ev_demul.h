@@ -1,3 +1,6 @@
+// Event Demultiplexer
+// 事件驱动复用器
+// 注册回调函数，Epoll等待事件、调用回调函数
 #ifndef EV_DEMUL_H
 #define EV_DEMUL_H
 

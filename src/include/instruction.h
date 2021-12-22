@@ -1,3 +1,6 @@
+// Instruction
+// 星志信号机指令格式相关
+
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 // instruction.h

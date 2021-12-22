@@ -1,3 +1,4 @@
+// 处理函数声明头
 #ifndef HANDLER_H
 #define HANDLER_H
 
