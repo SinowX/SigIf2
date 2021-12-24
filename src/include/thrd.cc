@@ -1,13 +1,14 @@
 #include "thrd.h"
 #include "handler.h"
 #include "conn_q.h"
-/* #include <unistd.h> */
 #include "instruction_manager.h"
+#include "log_mgr.h"
 
 void Leader()
 {
+
 	std::thread thrd_acpt,thrd_iorcvr[10],
-		thrd_wokr[10], thrd_hbkpr[10];
+		thrd_wokr[10], thrd_hbkpr[10], thrd_log;
 	thrd_acpt = std::thread(Acceptor);
 	/* thrd_iorcvr = std::thread(IOReceiver); */
 	
@@ -24,13 +25,17 @@ void Leader()
 	{
 		thrd_wokr[i] = std::thread(Worker,i);
 	}
+	
+	const auto& info = ConfMgr::getInstance().get_machine();
 
-	const Machine& info = ConfMgr::getInstance().get_machine();
+	/* const Machine& info = ConfMgr::getInstance().get_machine(); */
 	if(info.XINGZHI.number>0)thrd_hbkpr[0]=std::thread(HBKeeper, MachineType::XINGZHI);
 	if(info.HAIXIN.number>0) thrd_hbkpr[1]=std::thread(HBKeeper, MachineType::HAIXIN);
 	if(info.HAIKANG.number>0)thrd_hbkpr[2]=std::thread(HBKeeper, MachineType::HAIKANG);
 	if(info.XIMENZI.number>0)thrd_hbkpr[3]=std::thread(HBKeeper, MachineType::XIMENZI);
 	if(info.DEVICE5.number>0)thrd_hbkpr[4]=std::thread(HBKeeper, MachineType::DEVICE5);
+
+	thrd_log = std::thread(Logger);
 
 	while(true)
 	{
@@ -42,17 +47,20 @@ void Acceptor()
 {
 	ConfMgr& confmgr = ConfMgr::getInstance();
 
-	ConnInfoPtr server = std::make_shared<ConnInfo>(ConnType::NORMAL_CONN,confmgr.get_listen_addr(),
-			confmgr.get_port());
-	server->get_tcp_conn()->Listen();
+	/* ConnInfoPtr server = std::make_shared<ConnInfo>(ConnType::NORMAL_CONN,confmgr.get_listen_addr(), */
+	/* 		confmgr.get_listen_port()); */
+	ConnInfoPtr server = std::make_shared<ConnInfo>(ConnType::TCP, false, -1,
+			confmgr.get_listen_addr(), confmgr.get_listen_port());
+	server->get_Tcp_Conn()->Listen();
+
+	ConnMap::getInstance().Insert(server->get_Ipv4(),server);
 	
-	ConnMap::getInstance().Insert(server->get_tcp_conn()->get_fd(),server);
-	
-	EvDemul demultiplex;
+	EvDemul demultiplex(server->get_Tcp_Conn()->get_Fd());
 	demultiplex.RegisterCallback(
 			accept_fd_hdlr, error_fd_hdlr);
 
-	demultiplex.AddListen(server->get_tcp_conn()->get_fd());
+	demultiplex.AddEvent(server->get_Tcp_Conn()->get_Fd());
+	/* demultiplex.AddListen(server->get_tcp_conn()->get_fd()); */
 
 	while(true)
 	{
@@ -74,20 +82,10 @@ void IOReceiver()
 		ConnInfoPtr newconn = NewConnQ().TryPop();
 		if(newconn!=nullptr)
 		{
-			demultiplex.AddListen(newconn->get_tcp_conn()->get_fd());
+			demultiplex.AddEvent(newconn->get_Fd());
 		}
 		demultiplex.WaitEvents();
 	}
-}
-
-
-
-
-
-static std::shared_ptr<std::string>
-GetOneJsonStr(BufferPtr buffer)
-{
-
 }
 
 void Worker(int worker_id)
@@ -96,27 +94,25 @@ void Worker(int worker_id)
 	while(true)
 	{
 		ConnInfoPtr newtask = TaskQ().Pop();
-		
-		if(newtask->get_type()==ConnType::MACHINE)
+
+		switch(newtask->get_ConnType())
 		{
-			// from machine
-			machine_msg_hdlr(newtask);
-			/* auto pack = newtask->get_udp_conn()->GetOnePack(); */
-			/* InsParser parser; */
-			/* parser.Parse(reinterpret_cast<const unsigned char*> */
-			/* 		(pack->c_str()),pack->size()); */
-			
-			// write back
-
-		}else{
-			// from client
-			
-			auto json_str = GetOneJsonStr(newtask->get_tcp_conn()->get_r_buffer());
-
-			client_query_hdlr(newtask, json_str);
+			case ConnType::UDP:
+			{
+				machine_msg_hdlr(newtask);
+				break;
+			}
+			case ConnType::TCP:
+			{
+				const char* read_buff=nullptr;
+				while(!(read_buff=newtask->get_Tcp_Conn()
+							->get_r_Buffer()->get_One_Json()))
+				{
+					client_query_hdlr(newtask, read_buff);
+					delete[] read_buff;
+				}
+			}
 		}
-
-		
 	}
 }
 
@@ -124,16 +120,16 @@ void HBKeeper(int machine_type)
 {
 	ConfMgr& confmgr = ConfMgr::getInstance();
 	std::list<ConnInfoPtr> conn_list;
-	MachineInfo *machine_info = confmgr.get_machine().XINGZHI.head;
 
 	switch(machine_type)
 	{
 		case MachineType::XINGZHI:
 			{
+				MachineInfo *machine_info = confmgr.get_machine().XINGZHI.head;
 				while(machine_info!=nullptr)
 				{
 					ConnInfoPtr conn = std::make_shared<ConnInfo>(
-							ConnType::MACHINE,machine_info->ipv4,
+							ConnType::UDP, false, -1 ,machine_info->ipv4,
 							machine_info->port);
 					conn_list.push_back(conn);
 				}

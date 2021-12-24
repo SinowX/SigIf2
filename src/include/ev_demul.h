@@ -6,19 +6,22 @@
 
 #include <memory>
 #include <functional>
-#include "ev_hdlr.h"
 #include <sys/epoll.h>
-#include "tcp_wrap.h"
-#include "conn_info.h"
+
 #include "conn_map.h"
 #include "conf_mgr.h"
+#include "ev_hdlr.h"
+#include "log_mgr.h"
 
 class EvDemul
 {
 	public:
-		EvDemul()
+		EvDemul(const int accept_fd=-1)
+			:acpt_fd_(accept_fd)
 		{
+			bzero(&ev_tpl, sizeof ev_tpl);
 			ev_tpl.events=EPOLLIN|EPOLLET|EPOLLERR|EPOLLRDHUP;
+			epfd_ = epoll_create(1024);
 		}
 		~EvDemul(){};
 		EvDemul(EvDemul&)=delete;
@@ -32,55 +35,29 @@ class EvDemul
 				std::function<int(const int)> query_func=nullptr
 				)
 		{
-			if(ev_hdlr_!=nullptr)
+			if(ev_hdlr_==nullptr)
 			{
-				ev_hdlr_ = std::make_shared<EvHdlr>(accept_func, error_func, read_func, write_func, query_func);
+				ev_hdlr_ = std::make_shared<EvHdlr>(
+						accept_func, error_func, read_func,
+					 	write_func, query_func);
 				return 0;
 			}else{
+				LOGWARN("trying to register a registered ev_hdlr");
 				return -1;
 			}
 		}
 
-		int AddListen(int fd, struct epoll_event* ev=nullptr)
+		int AddEvent(int fd, struct epoll_event* ev=nullptr)
 		{
 			if(ev==nullptr)	ev = &ev_tpl;
 			return epoll_ctl(epfd_, EPOLL_CTL_ADD , fd, ev);
 		}
-		int DropListen(int fd, struct epoll_event* ev=nullptr)
+		int DropEvent(int fd, struct epoll_event* ev=nullptr)
 		{
 			if(ev==nullptr)	ev = &ev_tpl;
 			return epoll_ctl(epfd_, EPOLL_CTL_DEL, fd, ev);
 		}
-
-		int WaitEvents()
-		{
-			struct epoll_event active_ev[1024];
-			int active_num = epoll_wait(epfd_, active_ev, 1024, -1);
-			int fd{-1};
-			uint32_t events{0};
-			ConnInfoPtr conn{nullptr};
-
-			for(int i=0; i<active_num; i++)
-			{
-				fd = active_ev[i].data.fd;
-				events = active_ev[i].events;
-				conn=ConnMap::getInstance().Find(fd);
-				if(events & EPOLLIN)
-				{
-					if(fd == acpt_fd_)
-					{
-						ev_hdlr_->Handle_Accept(fd);
-					}else{
-						ev_hdlr_->Handle_Read(fd);
-					}
-				}
-				if(events & EPOLLERR|| events & EPOLLRDHUP)
-				{
-					ev_hdlr_->Handle_Error(fd);
-				}
-			}
-		}
-
+		int WaitEvents();
 
 	private:
 		std::shared_ptr<EvHdlr> ev_hdlr_{nullptr};

@@ -12,31 +12,6 @@ enum MachineType
 };
 
 //
-typedef struct MachineInfo
-{
-  char ipv4[16];
-	uint16_t port;
-  int id;
-  struct MachineInfo *next;
-}MachineInfo;
-
-
-//
-typedef struct EachMachineType
-{
-  int number;
-  MachineInfo* head;
-}EachMachineType;
-
-// 用于读取配置文件，保存信号机的相关信息
-typedef struct
-{
-  EachMachineType XINGZHI;
-  EachMachineType HAIXIN;
-  EachMachineType HAIKANG;
-  EachMachineType XIMENZI;
-  EachMachineType DEVICE5;
-}Machine;
 
 // 接口指令类型字符串，用于匹配客户端的json请求
 namespace  IFTYPE{

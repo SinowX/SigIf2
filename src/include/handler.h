@@ -12,7 +12,7 @@ int accept_fd_hdlr(const int fd);
 int read_all_hdlr(const int fd);
 
 // query handlers
-int client_query_hdlr(ConnInfoPtr client_conn, BufferPtr json_str);
+int client_query_hdlr(ConnInfoPtr client_conn, const char* json_str);
 
 int machine_msg_hdlr(ConnInfoPtr machine_conn);
 
@@ -22,10 +22,9 @@ int machine_msg_hdlr(ConnInfoPtr machine_conn);
 // error handlers
 int error_fd_hdlr(const int fd);
 
-
 // machine heart beat
 
-int SendHB_XingZhi(const ConnInfoPtr& conn);
+/* int SendHB_XingZhi(ConnInfoPtr& conn); */
 
 
 #endif

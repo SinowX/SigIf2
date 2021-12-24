@@ -11,3 +11,5 @@ set_target_properties(insmgr PROPERTIES OUTPUT_NAME "insmgr")
 
 add_executable(main main.cc)
 target_link_libraries(main thrd insmgr)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/include)

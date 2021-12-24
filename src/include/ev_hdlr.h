@@ -8,6 +8,8 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 #include "conn_map.h"
+#include "log_mgr.h"
+
 
 class EvHdlr
 {
@@ -19,49 +21,59 @@ class EvHdlr
 				std::function<int(const int, const char*)> write_hdlr=nullptr,
 				std::function<int(const int)> query_hdlr=nullptr
 				)
-		{};
-		~EvHdlr();
+			:accept_hdlr_(accept_hdlr), error_hdlr_(error_hdlr),
+			read_hdlr_(read_hdlr), write_hdlr_(write_hdlr), query_hdlr_(query_hdlr)
+		{}
+
+		~EvHdlr()=default;
 
 
+		int Handle(std::function<int(const int)>& hdlr, const int fd)
+		{
+			if(hdlr!=nullptr)
+				return hdlr(fd);
+			else
+			{
+				LOGWARN("trying to invoke unset hldr");
+				return -1;
+			}
+		}
+
+		int Handle(std::function<int(const int, const char*)>& hdlr, const int fd, const char* str)
+		{
+			if(hdlr!=nullptr)
+				return hdlr(fd,str);
+			else
+			{
+				LOGWARN("trying to invoke unset hldr");
+				return -1;
+			}
+		}
+		
 		int Handle_Accept(const int fd)
 		{
-			if(accept_hdlr_!=nullptr)
-		 		return accept_hdlr_(fd);
-			else
-				return -1;
+			return Handle(accept_hdlr_,fd);
 		}
 		
 		// close this fd and free relative ConnMap item
 		int Handle_Error(const int fd)
 		{
-			ConnMap::getInstance().Drop(fd);
-			close(fd);
-			return 0;
+			return Handle(error_hdlr_,fd);
 		}
 
 		int Handle_Read(const int fd)
 		{
-			if(read_hdlr_!=nullptr)
-		 		return read_hdlr_(fd);
-			else
-				return -1;
+			return Handle(read_hdlr_,fd);
 		}
 
 		int Handle_Query(const int fd)
 		{ 
-			if(query_hdlr_!=nullptr)
-		 		return query_hdlr_(fd);
-			else
-				return -1;
+			return Handle(query_hdlr_,fd);
 		}
 
 		int Handle_Write(int fd, const char* str)
 		{ 
-			/* std::lock_guard<std::mutex> lk(mtx_); */
-			if(write_hdlr_!=nullptr)
-		 		return write_hdlr_(fd, str);
-			else
-				return -1;
+			return Handle(write_hdlr_,fd, str);
 		}
 
 	private:
