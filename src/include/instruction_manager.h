@@ -87,7 +87,7 @@ class InsParser
     InsParser(ssize_t length=MAX_BUFFER_LENGTH)
       :buff(nullptr),buff_len(length),buff_current_len(0),
       SenderID(0),ReceiverID(0),AreaID(0),IntersectionID(0),
-      content_len(0)
+      content_len(0),parsed{false}
     {
       /* reader = new csv::CSVReader("./GB25280-2016.csv"); */
       memset(Reserve,0,sizeof(Reserve));
@@ -106,6 +106,7 @@ class InsParser
       delete []Content;
       /* delete reader; */
     }
+		bool isParsed() const {return parsed;}
     // return Instruction Type Id
     // else return -1(65535) for error
     const uint8_t
@@ -170,6 +171,7 @@ class InsParser
     ssize_t buff_len;
     ssize_t buff_current_len;
     csv::CSVReader *reader;
+		bool parsed;
 };
 
 

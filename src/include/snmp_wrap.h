@@ -13,8 +13,8 @@ public:
 	SnmpWrap(const char* ipv4_addr, const uint16_t port)
 		: port_(port)
 	{
-		/* strncpy(ipv4_addr_, ipv4_addr, 16); */
-		ipv4_addr_ = ipv4_addr;
+		strncpy(ipv4_addr_, ipv4_addr, 16);
+		/* ipv4_addr_ = ipv4_addr; */
 
 		snmp_sess_init(&session);
 		session.peername = new char[30];
@@ -62,7 +62,7 @@ public:
 	/* StringShr Set(std::string data); */
 	
 private:
-	StringShr ipv4_addr_{nullptr};
+	char* ipv4_addr_{nullptr};
 	uint16_t port_{0};
 	netsnmp_session session, *ss;
 	netsnmp_pdu *pdu;

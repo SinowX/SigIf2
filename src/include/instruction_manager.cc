@@ -218,8 +218,9 @@ InsParser::Parse(const uint8_t *instruction, const ssize_t length)
 			/* printf("%04x\n",IntersectionID); */
 			/* printf("%02x\n",Reserve); */
 			/* printf("%02x\n",InsType); */
-			delete reader;	
-			return InsType;	
+			delete reader;
+			parsed=true;	
+			return InsType;
 
 		}
 	}
